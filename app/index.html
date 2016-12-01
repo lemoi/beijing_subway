@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <link rel="shortcut icon" href="icon.ico" >
+        <title>北京市地铁计价假想系统</title>
+        <style>
+            body {
+                font-family: "微软雅黑";
+            }
+            body h2 {
+                margin-top: 50px;
+            }
+            #view {
+                width: 750px;
+                float: left;
+                text-align: center;
+            }
+            #map {
+                width: 750px;
+                height: 500px;
+                overflow: hidden;
+                margin: auto;
+            }
+            #title {
+                text-align: center;
+            }
+            #display {
+                float: left;
+                width: 400px;
+                padding-top: 30px;
+                padding-left: 60px;
+            }
+            #inp select{
+                width: 110px;
+                margin-right: 15px;
+                margin-left: 5px;
+                font-size: 1em;
+            }
+            #route {
+                padding-top: 15px;
+            }
+            #route_display {
+                border: 1px solid #66ccff;
+                height: 300px;
+                margin: 10px;
+                margin-top: 20px;
+                overflow: auto;
+                text-align: center;
+                padding: 1em 0;
+            }
+            #run {
+                height: 2em;
+                width: 10em;
+                margin: auto;
+                display: block;
+                background: #66ccff;
+                margin-top: 30px;
+            }
+            .btn {
+                display: inline-block;
+                *display: inline;
+                padding: 4px 12px;
+                margin-bottom: 0;
+                *margin-left: .3em;
+                font-size: 14px;
+                line-height: 20px;
+                color: #333333;
+                text-align: center;
+                text-shadow: 0 1px 1px rgba(255, 255, 255, 0.75);
+                vertical-align: middle;
+                cursor: pointer;
+                background-color: #f5f5f5;
+                *background-color: #e6e6e6;
+                background-image: -moz-linear-gradient(top, #ffffff, #e6e6e6);
+                background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ffffff), to(#e6e6e6));
+                background-image: -webkit-linear-gradient(top, #ffffff, #e6e6e6);
+                background-image: -o-linear-gradient(top, #ffffff, #e6e6e6);
+                background-image: linear-gradient(to bottom, #ffffff, #e6e6e6);
+                background-repeat: repeat-x;
+                border: 1px solid #cccccc;
+                *border: 0;
+                border-color: #e6e6e6 #e6e6e6 #bfbfbf;
+                border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+                border-bottom-color: #b3b3b3;
+                -webkit-border-radius: 4px;
+                 -moz-border-radius: 4px;
+                      border-radius: 4px;
+                filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffffff', endColorstr='#ffe6e6e6', GradientType=0);
+                filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
+                *zoom: 1;
+                -webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
+                 -moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
+                      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
+            }
+            .btn:hover,
+            .btn:focus {
+                color: #333333;
+                text-decoration: none;
+                background-position: 0 -15px;
+                -webkit-transition: background-position 0.1s linear;
+                 -moz-transition: background-position 0.1s linear;
+                   -o-transition: background-position 0.1s linear;
+                      transition: background-position 0.1s linear;
+            }
+            .poniter {
+                font-size: 20px;
+            }
+            #price_display {
+                text-align: center;
+            }
+            #info {
+                margin-top: 10px;
+            }
+        </style>
+    </head>
+<body>
+    <h2 id="title">北京市地铁计价假想系统</h2>
+    <div id="view">
+        <div id="map">
+            <img src="subway_map.jpg" width="750" height="500">
+        </div>
+        <div id="info">
+            计费说明 : 五站内3元，之后每过一站加1元
+        </div>
+    </div>
+    <div id="display">
+        <div id="inp">
+            <label>起始站 : </label>
+            <select id="start">
+            </select>
+            <label>终点站 : </label>
+            <select id="end">
+            </select>            
+        </div>
+        <button id="run" class="btn">run</button>
+        <div id="route">
+            <span>路线如下 : </span>
+            <div id="route_display"></div>
+        </div>
+        <div id="price_display">
+            <label>Price : </label>
+            <span id="price"> 0</span>
+        </div>
+    </div>
+    <script>
+        const { BFS, stations } = require('./model.js')
+        const route = document.getElementById('route_display')
+        const run = document.getElementById('run')
+        const start = document.getElementById('start')
+        const end = document.getElementById('end')
+        const price = document.getElementById('price')
+        function station(name) {
+            return '<span class="station">' + name + '</span>' 
+        }
+        function show() {
+            let buffer = []
+            let r = BFS(start.value, end.value)
+            if (start.value == end.value) {
+                price.textContent = 0
+                buffer.push("不需要地铁吧^V^")               
+            } else if (r.length == 0) {
+                price.textContent = 0
+                buffer.push("Sorry, can't reach")                
+            } else {
+                for (let s of r) {
+                    buffer.push(station(s))
+                    buffer.push('<span class="poniter">\u21D3</span>')
+                }
+                buffer.pop()
+                price.textContent = count(r.length - 1) + '元'
+            }
+            route.innerHTML = buffer.join('<br>');
+        }
+        function count(n) {
+            if(n > 5)
+                return 3 + n - 5
+            return 3
+        }
+        function init() {
+            for (let i of stations) {
+                let opt1 = document.createElement('option'),
+                opt2 = document.createElement('option')
+                opt1.textContent = opt1.value = i
+                opt2.textContent = opt2.value = i;
+                start.appendChild(opt1)
+                end.appendChild(opt2)
+            }
+        }
+        init()
+        run.onclick = show
+    </script>
+</body>
+</html>

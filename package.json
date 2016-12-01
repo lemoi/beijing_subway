@@ -1,0 +1,16 @@
+{
+  "name": "beijing_subway",
+  "version": "1.0.0",
+  "main": "main.js",
+  "dependencies": {
+    "electron": "^1.4.10"
+  },
+  "scripts": {
+    "start": "electron .",
+    "packager": "electron-packager ./app beijing_subway --all --version 1.4.10 --out ./out --overwrite --asar --icon=./app/icon.ico"
+  },
+  "devDependencies": {
+    "asar": "^0.12.3",
+    "electron-packager": "^8.3.0"
+  }
+}

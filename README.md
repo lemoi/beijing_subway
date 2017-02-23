@@ -8,4 +8,4 @@ npm install
 
 npm run packager
 ```
-Then，the packed app will be seen in directory out  
+Then，the packed app will be seen in directory `out/`  
